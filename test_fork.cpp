@@ -5,40 +5,83 @@
 #include <unistd.h>
 #include <iostream>
 
-using namespace std;
+#include <sys/types.h>  // Defines pid_t for process IDs.
+#include <sys/wait.h>   // Provides wait().
+#include <unistd.h>     // Provides fork() and sleep().
+#include <iostream>     // Provides cout and endl.
 
-int main()
-{
-  pid_t pid;		//process id
-  const char *message;
-  int n;
-  cout << "fork program starting" << endl;
-  pid = fork(); // Fork cretes the child process
-  switch (pid) {
-  case -1:
-    cout << "Fork failure!\n"; //fork ffailed and no child was produced
-    return 1;
-  case 0:
-    // pid is 0 in the child process.
-    // The child will print its message 5 times.
-   message = "This is the child\n";
-    n = 5;
-    break;
-  default:
-    // pid is greater than 0 in the parent process.
-    // The child will print its message 3 times.
-    message = "This is the parent\n";
-    n = 3;
-    break;
-  }
-  for (int i = 0; i < n; ++i) { // The procces each print out n times and they 
-                                //pause one second between each line
-    cout << message;
-    sleep (1);
-  }
+using namespace std;  // Allows standard output names without the std:: prefix.
 
-  // Only the parent waits for the child to finish.
-  // The child skips this because its pid value from fork() is 0.
-  if (pid > 0) wait(NULL);
-  return 0; 
+int main() {  // Begins the program.
+
+    // Stores the value returned by fork().
+    pid_t pid;
+
+    // Points to the message selected for each process.
+    const char *message;
+
+    // Stores how many times each process prints its message.
+    int n;
+
+    // Prints and flushes the startup message before fork().
+    cout << "fork program starting" << endl;
+
+    // Creates a child process.
+    // The child receives 0, while the parent receives the child's PID.
+    pid = fork();
+
+    // Selects the correct behavior using the fork() return value.
+    switch (pid) {
+
+    // A value of -1 means that fork() failed.
+    case -1:
+
+        // Reports that no child was created.
+        cout << "Fork failure!\n";
+
+        // Ends the program with an error status.
+        return 1;
+
+    // A value of 0 identifies the child process.
+    case 0:
+
+        // Selects the child's output message.
+        message = "This is the child\n";
+
+        // Makes the child print five times.
+        n = 5;
+
+        // Leaves the switch statement.
+        break;
+
+    // A positive value identifies the original parent process.
+    default:
+
+        // Selects the parent's output message.
+        message = "This is the parent\n";
+
+        // Makes the parent print three times.
+        n = 3;
+
+        // Leaves the switch statement.
+        break;
+    }
+
+    // Each process repeats according to its own value of n.
+    for (int i = 0; i < n; ++i) {
+
+        // Prints the message selected for this process.
+        cout << message;
+
+        // Pauses the process for approximately one second.
+        sleep(1);
+    }
+
+    // Only the original parent waits for and collects the child.
+    if (pid > 0)
+        wait(NULL);
+
+    // Ends the process successfully.
+    return 0;
+}
 }
