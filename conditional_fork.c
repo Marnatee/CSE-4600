@@ -1,34 +1,37 @@
-// Complete example: run, add explanations, and draw the observed tree.
-#include <stdio.h>
-#include <unistd.h>
+#include <stdio.h>   // Provides printf().
+#include <unistd.h>  // Provides fork(), getpid(), getppid(), and sleep().
 
-int main() {
-    // The original process creates its first child.
+int main() {  // Begins the program.
+
+    // Creates the first child process.
+    // The child receives 0, while the parent receives the child's PID.
     int value = fork();
 
+    // Only the first child enters this branch.
     if (value == 0) {
 
-        // This child creates another child.
+        // Creates another process from the first child.
         fork();
 
-        // Check the PID of each process created in this branch.
+        // Each process in this branch checks its own PID.
         if (getpid() % 2 == 0) {
 
-            // Only processes with an even PID create another child.
+            // Only a process with an even PID creates another child.
             fork();
         }
 
     } else {
 
-        // The original parent creates another child.
+        // The original parent creates another direct child.
         fork();
     }
 
-    // Every process that exists at this point prints its PID and parent PID.
+    // Every process created by the program reaches this statement.
     printf("Hello from PID: %d, PPID: %d\n", getpid(), getppid());
 
-    // Keep the processes alive briefly so their output can be observed.
+    // Keeps each process alive briefly so its output can be observed.
     sleep(2);
 
+    // Ends the process successfully.
     return 0;
 }
