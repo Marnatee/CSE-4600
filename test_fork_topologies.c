@@ -6,99 +6,119 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-int main(void){
+int main(void) {  // Begins the program.
+
+    // Disables output buffering so fork does not duplicate unprinted output.
     setbuf(stdout, NULL);
+
+    // Stores the process IDs displayed by each example.
     pid_t child_pid, parent_pid;
 
-    // Create 5 sibling processes from the same original parent.
+    // Labels the first process relationship.
     printf("Create 5 sibling processes from the same parent:\n");
 
-    for (int i = 0; i < 5; i++){
+    // Repeats five times to create five direct children.
+    for (int i = 0; i < 5; i++) {
 
-        // fork() creates a child process.
-        // The child enters this if statement because fork() returns 0.
+        // fork() creates a child, and only that child enters this block.
         if (fork() == 0) {
 
-            // Get the child's process ID and its parent's process ID.
+            // Gets the current child's process ID.
             child_pid = getpid();
+
+            // Gets the process ID of the child's parent.
             parent_pid = getppid();
 
+            // Displays the relationship between the child and parent.
             printf("Child Process (ID): %d, parent process (ID): %d\n",
                    child_pid, parent_pid);
 
-            // Child finishes so it does not create additional processes.
+            // Ends the child so it cannot continue the loop.
             exit(0);
         }
 
-        // Parent waits for the child before creating the next sibling.
+        // The original parent waits for the current child to finish.
         wait(NULL);
     }
 
-
-    // Create the branching tree described in the handout.
+    // Labels the small branching-tree example.
     printf("\nCreate the handout branching tree (not a full binary tree):\n");
 
-    for (int i = 0; i < 2; i++){
+    // Creates two direct children of the original parent.
+    for (int i = 0; i < 2; i++) {
 
-        // Create a child from the original parent.
+        // Creates a child, which enters this block when fork() returns 0.
         if (fork() == 0) {
 
+            // Gets this direct child's PID.
             child_pid = getpid();
+
+            // Gets the original parent's PID.
             parent_pid = getppid();
 
-            // Display the relationship between this child and its parent.
+            // Prints the direct child-to-parent relationship.
             printf("1. Child Process (ID): %d, parent process (ID): %d\n",
                    child_pid, parent_pid);
 
-            // Only the first child creates another child.
+            // Only the first direct child creates another process.
             if (i == 0) {
 
-                // Create a nested child (grandchild of the original parent).
+                // Creates one grandchild of the original process.
                 fork();
 
+                // Gets the PID of the process currently executing this line.
                 child_pid = getpid();
+
+                // Gets its current parent's PID.
                 parent_pid = getppid();
 
-                // Display the nested process relationship.
+                // Both the first child and its new child print here.
                 printf("2. Child Process (ID): %d, parent process (ID): %d\n",
                        child_pid, parent_pid);
             }
 
-            // Wait for the nested child if this process created one.
+            // Waits for the nested child if this process created one.
             wait(NULL);
 
+            // Stops this child from continuing the outer loop.
             exit(0);
         }
 
-        // Original parent waits for each child to finish.
+        // The original parent waits for each direct child.
         wait(NULL);
     }
 
-
-    // Create a star topology:
-    // one parent in the center with 6 child processes.
+    // Labels the six-child star relationship.
     printf("\nStar topology of processes:\n");
 
-    for (int i = 0; i < 6; i++){
+    // Creates six children from the same original parent.
+    for (int i = 0; i < 6; i++) {
 
-        // Each fork creates a child directly from the same parent.
+        // Only each newly created child enters this block.
         if (fork() == 0) {
 
+            // Gets the current child's PID.
             child_pid = getpid();
+
+            // Gets the common parent's PID.
             parent_pid = getppid();
 
+            // Displays the relationship between this child and the parent.
             printf("Child Process (ID): %d, parent process (ID): %d\n",
                    child_pid, parent_pid);
 
-            // Child exits so it does not create additional children.
+            // Prevents the child from continuing the creation loop.
             exit(0);
         }
     }
 
-    // Parent waits for all 6 children to finish.
-    for (int i = 0; i < 6; i++){
+    // Reaps all six children created in the preceding loop.
+    for (int i = 0; i < 6; i++) {
+
+        // Waits for one unfinished child during each iteration.
         wait(NULL);
     }
 
+    // Ends the original parent successfully.
     return 0;
 }
